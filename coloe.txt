@@ -1,0 +1,5 @@
+primary: "#FDF0D5",
+          secondary: "#C1121F",
+          accent: "#003049",
+          neutral: "#669BBC",
+          "base-100": "#ffffff",
