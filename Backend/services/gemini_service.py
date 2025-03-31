@@ -32,20 +32,17 @@ def get_recipe_from_image(image_data, predicted_class=None, servings=1, allergie
     try:
         base64_image = encode_image_to_base64(image_data)
         
-        # Format allergies information if provided
         allergy_guidance = ""
         if allergies and isinstance(allergies, list) and len(allergies) > 0:
             allergy_guidance = "Important: The person has the following allergies: " + ", ".join(allergies) + ". "
             allergy_guidance += "Please avoid these allergens in the recipe and suggest appropriate substitutes. "
             
-            # Add specific substitutes information
             for allergy in allergies:
                 allergy_lower = allergy.lower()
                 for allergen, substitutes in ALLERGEN_SUBSTITUTES.items():
                     if allergy_lower in allergen or allergen in allergy_lower:
                         allergy_guidance += f"For {allergen}, you can use {', '.join(substitutes)}. "
         
-        # Set the prompt based on whether we have a model prediction
         if predicted_class:
             prompt = f"""
             The image is identified as {predicted_class}, an Indian dish.
@@ -106,10 +103,8 @@ def get_recipe_from_image(image_data, predicted_class=None, servings=1, allergie
             recipe_text = response_data['candidates'][0]['content']['parts'][0]['text']
             recipe_json = json.loads(recipe_text.replace('```json', '').replace('```', '').strip())
             
-            # Add identification source to the recipe data
             recipe_json["identification_source"] = identification_source
             
-            # Add allergy information to the recipe data
             if allergies:
                 recipe_json["allergen_free"] = allergies
                 

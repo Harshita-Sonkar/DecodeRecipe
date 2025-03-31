@@ -9,7 +9,6 @@ from utils.helpers import save_uploaded_image
 
 logger = logging.getLogger(__name__)
 
-# Create blueprint
 recipe_bp = Blueprint('recipe', __name__)
 
 @recipe_bp.route('/upload', methods=['POST'])
@@ -22,46 +21,36 @@ def upload():
         if file.filename == '':
             return jsonify({'error': 'No selected file'}), 400
 
-        # Get servings from form data
         servings = request.form.get("servings")
         if not servings or not servings.isdigit():
             servings = 1
         servings = int(servings)
         
-        # Get allergies from form data
         allergies = request.form.get("allergies")
         if allergies:
             allergies = [allergen.strip() for allergen in allergies.split(',')]
         else:
             allergies = []
 
-        # Optional force mode
-        force_mode = request.form.get("force_mode", "auto")  # Options: "model", "gemini", "auto"
+        force_mode = request.form.get("force_mode", "auto")
 
-        # Read image data and create PIL Image
         image_data = file.read()
         file.seek(0)
         image = Image.open(io.BytesIO(image_data))
         image.load()
     
-        # Save the image
         image_filepath = save_uploaded_image(file)
         image_filename = os.path.basename(image_filepath)
 
-        # Use model to predict food class
         predicted_class, confidence = predict_food_from_image(image)
         
-        # Determine whether to use the model prediction based on force_mode
         if force_mode == "model":
-            # Force using model prediction even if confidence is low
             use_prediction = predicted_class is not None
         elif force_mode == "gemini":
-            # Force using Gemini for identification
             use_prediction = False
-        else:  # "auto" mode
+        else: 
             use_prediction = predicted_class is not None and confidence >= 0.5
         
-        # Get recipe using Gemini, with predicted class if available and confidence is high
         recipe_data = get_recipe_from_image(
             image_data, 
             predicted_class if use_prediction else None, 
@@ -69,7 +58,6 @@ def upload():
             allergies
         )
 
-        # Return the recipe data along with model prediction info and identification source
         return jsonify({
             'message': 'Success',
             'dish_name': recipe_data.get("name"),

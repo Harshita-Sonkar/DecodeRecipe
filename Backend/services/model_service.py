@@ -7,11 +7,9 @@ from config import MODEL_WEIGHTS_PATH
 
 logger = logging.getLogger(__name__)
 
-# Set device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 logger.info(f"Using device: {device}")
 
-# Define CustomEfficientNet class
 class CustomEfficientNet(torch.nn.Module):
     def __init__(self, num_classes=206):  
         super(CustomEfficientNet, self).__init__()
@@ -21,7 +19,6 @@ class CustomEfficientNet(torch.nn.Module):
     def forward(self, x):
         return self.model(x)
 
-# Image preprocessing transformation
 transform = transforms.Compose([
     transforms.Resize(224),
     transforms.CenterCrop(224),
@@ -29,10 +26,8 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-# Load class labels
 def load_class_labels():
     try:
-        # Original raw class labels
         raw_labels = ['aam_panna', 'adhirasam', 'aloo_gobi', 'aloo_matar', 'aloo_methi', 'aloo_pattice', 'aloo_shimla_mirch', 
                   'aloo_tikki', 'aloo_vadi', 'anarsa', 'appe', 'ariselu', 'baingan_bharta', 'bandar_laddu', 'barfi', 
                   'basundi', 'bebinca', 'beetroot_tikki', 'besan_ladoo', 'bhakarwadi', 'bhapa_doi', 'bhatura', 'bhel_puri', 
@@ -63,7 +58,6 @@ def load_class_labels():
                   'thalipeeth', 'thandai', 'thepla', 'tikki_chaat', 'undhiyu', 'unni_appam', 'upma', 'uttapam', 'vada_pav', 
                   'veg_cutlet', 'veg_kolhapuri', 'vindaloo']
         
-        # Format class labels for better presentation
         class_labels = [label.replace("_", " ").title() for label in raw_labels]
         logger.info(f"Loaded {len(class_labels)} class labels")
         return class_labels
@@ -71,7 +65,6 @@ def load_class_labels():
         logger.error(f"Error loading class labels: {str(e)}")
         return []
 
-# Load the model
 def load_model():
     try:
         model = CustomEfficientNet().to(device)
@@ -83,12 +76,10 @@ def load_model():
         logger.error(f"Error loading model: {str(e)}")
         return None
 
-# Predict food item from image
 def predict_food_from_image(image):
     try:
         global model, class_labels
         
-        # Lazy loading of model and class labels
         if 'model' not in globals() or model is None:
             model = load_model()
         

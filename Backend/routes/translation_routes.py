@@ -5,7 +5,6 @@ from utils.helpers import create_audio_data_uri
 
 logger = logging.getLogger(__name__)
 
-# Create blueprint
 translation_bp = Blueprint('translation', __name__)
 
 @translation_bp.route('/text-to-speech/languages', methods=['GET'])
