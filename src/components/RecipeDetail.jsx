@@ -1,6 +1,6 @@
 import { useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { Clock, CookingPot } from "lucide-react";
+import { Clock, CookingPot, Youtube } from "lucide-react";
 import { useState, useEffect } from "react";
 import TranslationAndSpeech from "./TTS";
 
@@ -11,8 +11,10 @@ const RecipePage = () => {
   const recipe = location.state?.recipe;
   const imagePreview = location.state?.imagePreview;
 
-  const prepTimeParts = recipe.prepTime.split(" ");
-  const cookTimeParts = recipe.cookTime.split(" ");
+  const prepTime = recipe.prepTime || "15 mins";
+  const cookTime = recipe.cookTime || "30 mins";
+  const prepTimeParts = prepTime.split(" ");
+  const cookTimeParts = cookTime.split(" ");
 
   const cookTimeNumber = cookTimeParts[0]; 
   const cookTimeUnit = cookTimeParts[1]; 
@@ -42,12 +44,25 @@ const RecipePage = () => {
           <p className="h-32 w-2/3 bg-primary bg-opacity-90 text-accent text-center text-balance p-9 my-8 rounded-3xl shadow-md shadow-primary">
             {recipe.description}
           </p>
+          {recipe.ytLink && (
+        <div className="flex justify-center mt-6">
+          <a 
+            href={recipe.ytLink} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="flex items-center bg-accent text-white px-6 py-3 rounded-lg hover:bg-neutral transition-all"
+          >
+            <Youtube className="mr-2" />
+            Watch Video Tutorial
+          </a>
+        </div>
+      )}
         </div>
         {imagePreview && (
           <img
             src={imagePreview}
             alt="uploaded dish"
-            className="w-96 shadow-md shadow-accent mb-10"
+            className="h-80 shadow-md shadow-accent mb-10"
           />
         )}
       </div>
@@ -82,8 +97,10 @@ const RecipePage = () => {
             Ingredients
           </h2>
           <ul className="bg-accent p-4 rounded-lg text-white list-disc list-inside">
-            {recipe.ingredients.map((ing, index) => (
-              <li key={index}>{ing.amount} {ing.item} || {ing}</li>
+          {Array.isArray(recipe.ingredients) && recipe.ingredients.map((ing, index) => (
+              <li key={index}>
+                {typeof ing === 'object' ? `${ing.amount} ${ing.item}` : ing}
+              </li>
             ))}
           </ul>
         </div>
@@ -95,10 +112,11 @@ const RecipePage = () => {
           <h2 className="font-fira-sans-condensed font-bold text-5xl text-accent mb-5">
             Instructions
           </h2>
-          <ol className="bg-accent p-4 rounded-lg text-white list-inside">
-            {recipe.instructions.map((step, index) => (
-              <li key={index}>{step}</li>
+          <ol className="bg-accent p-4 rounded-lg text-white list-decimal list-inside">
+          {Array.isArray(recipe.instructions) && recipe.instructions.map((step, index) => (
+              <li key={index} className="mb-2">{step}</li>
             ))}
+
           </ol>
         </div>
       </div>

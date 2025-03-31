@@ -12,6 +12,8 @@ const DecodePage = () => {
   const [decodedRecipe, setDecodedRecipe] = useState(null);
   const [exploreExpanded, setExploreExpanded] = useState(false);
   const [decodeExpanded, setDecodeExpanded] = useState(false);
+  const [allergies, setAllergies] = useState([]);
+  const [allergyInput, setAllergyInput] = useState("");
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -76,6 +78,7 @@ const DecodePage = () => {
     const formData = new FormData();
     formData.append("photo", selectedFile);
     formData.append("servings", servings);
+    formData.append("allergies", JSON.stringify(allergies));
 
     try {
       console.log("Making API request...");
@@ -103,6 +106,28 @@ const DecodePage = () => {
       navigate("/RecipeDetail", { state: { recipe: data, imagePreview } });
     } catch (error) {
       console.error("Error in handleDecode:", error);
+    }
+  };
+
+  const handleAllergyInput = (e) => {
+    setAllergyInput(e.target.value);
+  };
+
+  const addAllergy = () => {
+    if (allergyInput.trim() && !allergies.includes(allergyInput.trim())) {
+      setAllergies([...allergies, allergyInput.trim()]);
+      setAllergyInput("");
+    }
+  };
+
+  const removeAllergy = (allergyToRemove) => {
+    setAllergies(allergies.filter(allergy => allergy !== allergyToRemove));
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addAllergy();
     }
   };
 
@@ -199,6 +224,53 @@ const DecodePage = () => {
                     >
                       +
                     </button>
+                  </div>
+                )}
+
+                {/* Allergies Section */}
+                {decodedRecipe && (
+                  <div className="w-full max-w-md mt-4">
+                    <h3 className="text-accent font-bold text-lg mb-2">Any allergies or dietary restrictions?</h3>
+                    
+                    {/* Custom allergy input */}
+                    <div className="flex mb-3">
+                      <input
+                        type="text"
+                        value={allergyInput}
+                        onChange={handleAllergyInput}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Enter your allergies"
+                        className="px-4 py-2 bg-neutral bg-opacity-50 rounded-l-lg flex-grow"
+                      />
+                      <button
+                        type="button"
+                        onClick={addAllergy}
+                        className="px-4 py-2 bg-secondary bg-opacity-70 rounded-r-lg text-white"
+                      >
+                        Add
+                      </button>
+                    </div>
+                    
+                    {/* Selected allergies display */}
+                    {allergies.length > 0 && (
+                      <div className="mt-2">
+                        <h4 className="text-accent font-medium mb-1">Your allergies:</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {allergies.map(allergy => (
+                            <div key={allergy} className="flex items-center bg-secondary px-3 py-1 rounded-full">
+                              <span className="text-white text-sm">{allergy}</span>
+                              <button
+                                type="button"
+                                onClick={() => removeAllergy(allergy)}
+                                className="ml-2 text-white text-xs"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
